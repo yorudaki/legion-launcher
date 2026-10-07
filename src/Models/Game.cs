@@ -1,4 +1,5 @@
 using System;
+using Legion.Enums;
 
 namespace Legion.Models
 {

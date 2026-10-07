@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 using Legion.Util;
@@ -11,30 +12,27 @@ namespace Legion.Models
         private SortedList<string, Game> _games;
 
         public Library() {
-            _games = JsonParser.ReadLibrary();
-            _directories = new List<string>();
+            _games = new SortedList<string, Game>();
         }
 
         #region helper methods
-        private bool SearchGame(out int index) {
-            for (int i = 0; i < _games; i++) {
-                
-            }
-        }
+
         #endregion
 
         #region private methods
         private void LoadLibrary() {
-            _games = JsonParser.ReadLibrary();
+            var list = JsonParser.ReadLibrary();
+            foreach (Game game in list)
+                _games.Add(game.Name, game);
         }
 
-        private bool AddSteamGames() {
+        private void AddSteamGames() {
 
             var steamGames = new List<Game>();
-            steamGames = Fetcher.FetchSteamGames();
+            steamGames = Fetcher.GetSteamGames();
             
             foreach (Game game in steamGames) {
-                _games.Add(game);
+                _games.Add(game.Name, game);
             }
 
             LoadLibrary();
@@ -44,29 +42,27 @@ namespace Legion.Models
 
         #region public methods
 
-        public bool AddGame(Game game) {
-            bool response = false;
-
+        public void AddGame(Game game) {
             _games.Add(game.Name, game);
-            if (JsonParser.WriteLibrary(_games)) // if action is successful
-                response = true;
-            
-            return response;
+
+            var list = new List<Game>(_games.Values);
+            JsonParser.WriteLibrary(list);
 
         }
 
-        public bool RemoveGame(Game game) {
-            bool response = false;
+        public void RemoveGame(Game game) {
+            var list = new List<Game>(_games.Values);
 
-            _games.Remove(game.Name);
-            if (JsonParser.WriteLibrary(_games))
-                response = true;
-
-            return response;
+            list.Remove(game);
+            JsonParser.WriteLibrary(list);
         }
 
         public List<Game> GetGames() {
-            return _games;
+            var returnList = new List<Game>();
+            foreach (var value in _games)
+                returnList.Add(value.Value);
+            
+            return returnList;
         }
         
         #endregion

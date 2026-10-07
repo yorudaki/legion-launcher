@@ -1,22 +1,16 @@
 ﻿using System;
 using System.IO;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 using Legion.Models;
-using Legion.Services;
 using Legion.Util;
 
 namespace Legion.Parsers
 {
     internal static class JsonParser
     {
-        private static async void CreateLibraryJson(SortedList<Game> gameList) {
+        private static async void CreateLibraryJson(List<Game> gameList) {
             var jso = new JsonSerializerOptions {
                 WriteIndented = true
             };
@@ -29,16 +23,13 @@ namespace Legion.Parsers
         /// Writes a json file of all games saved.
         /// <param name="gameList">List of all games to be added</param>
         /// </summary>
-        public static async void WriteLibrary(SortedList<Game> gameList)
+
+        public static void WriteLibrary(List<Game> gameList)
         {
-            bool response = false;
-            
             if (File.Exists(LegionPath.LibraryJson)) {
-                response = true;
                 CreateLibraryJson(gameList);
             }
 
-            return response;
         }
         
         /// <summary>

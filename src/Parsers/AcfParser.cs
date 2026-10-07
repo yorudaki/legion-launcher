@@ -83,9 +83,11 @@ namespace Legion.Parsers
 		/// Given an .acf text file as string, returns an array of string containing the name, appid and installdir respectively.
 		/// </summary>
 		/// <returns>array[0] = name; array[1] = appid; array[2] = installdir; </returns>
-		private static string[] GetGameInfo(string file) {
+		private static void GetGameInfo(string file, out string name, out int appId, out string installDir) {
 			string line, trimmedLine;
-			string[] returnArray = new string[3];
+			name = null;
+			appId = 0;
+			installDir = null;
 
 			using (var sr = new StreamReader(file)) {
 				line = sr.ReadLine();
@@ -94,26 +96,27 @@ namespace Legion.Parsers
 					line = line.TrimStart();
 
 					if (line.StartsWith(""""name""""))
-						returnArray[0] = ReadLine(line);
+						name = ReadLine(line);
 
 					else if (line.StartsWith(""""appid""""))
-						returnArray[1] = ReadLine(line);
+						appId = int.Parse(ReadLine(line));
 
 					else if (line.StartsWith(""""installdir""""))
-						returnArray[2] = ReadLine(line);
+						installDir = ReadLine(line);
 				}
 			}
-
-			return returnArray;
 		}
 
 		/// <summary>
 		/// Given an .acf file text as string, returns a Game object based on the string.
 		/// </summary>
 		public static Game GetGameFromAcf(string file) {
-			string[] info = GetGameInfo(file);
+			string name = null, installDir = null;
+			int appId = 0;
 
-			return new Game(info[0], info[1], info[2], GameSource.Steam);
+			GetGameInfo(file, out name, out appId, out installDir);
+
+			return new Game(name, installDir, appId, GameSource.Steam);
 		}
     }
 }
