@@ -71,27 +71,26 @@ namespace Legion.Parsers
         {           
             /// no verification needed, acf is standardized anyways
 
-            int primeiro = linha.IndexOf('"');
-            int segundo = linha.IndexOf('"', primeiro + 1);
-            primeiro = linha.IndexOf('"', segundo + 1);
-            segundo = linha.IndexOf('"', primeiro + 1);            
+            int first = linha.IndexOf('"');
+            int second = linha.IndexOf('"', first + 1);
+            first = linha.IndexOf('"', second + 1);
+            second = linha.IndexOf('"', first + 1);            
 
-            return linha.Substring(primeiro + 1, segundo - primeiro - 1);
+            return linha.Substring(first + 1, second - first - 1);
         }
 
 		/// <summary>
-		/// Given an .acf text file as string, returns an array of string containing the name, appid and installdir respectively.
+		/// Given an .acf text file as string, modifies the out params, respectively: name, appId and installDir. If no value is found appropriate, the fallback is to: string = "", int = 0.
 		/// </summary>
-		/// <returns>array[0] = name; array[1] = appid; array[2] = installdir; </returns>
 		private static void GetGameInfo(string file, out string name, out int appId, out string installDir) {
-			string line, trimmedLine;
-			name = null;
+			string line;
+			name = "";
 			appId = 0;
-			installDir = null;
+			installDir = "";
 
 			using (var sr = new StreamReader(file)) {
 				line = sr.ReadLine();
-				while (line != null) 
+				while (line != null)
 				{
 					line = line.TrimStart();
 
@@ -111,8 +110,8 @@ namespace Legion.Parsers
 		/// Given an .acf file text as string, returns a Game object based on the string.
 		/// </summary>
 		public static Game GetGameFromAcf(string file) {
-			string name = null, installDir = null;
-			int appId = 0;
+			string name, installDir;
+			int appId;
 
 			GetGameInfo(file, out name, out appId, out installDir);
 

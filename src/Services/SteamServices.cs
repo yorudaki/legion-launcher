@@ -9,7 +9,7 @@ namespace Legion.Services
         {
             // start the game normally if steam is already started, else start steam silent
 
-            string message = null;
+            string message = "";
             
             try
             {

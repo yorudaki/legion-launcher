@@ -24,12 +24,15 @@ namespace Legion.Parsers
         /// <param name="gameList">List of all games to be added</param>
         /// </summary>
 
-        public static void WriteLibrary(List<Game> gameList)
+        public static bool WriteLibrary(List<Game> gameList)
         {
+            bool response = false;
             if (File.Exists(LegionPath.LibraryJson)) {
                 CreateLibraryJson(gameList);
+                response = true;
             }
 
+            return response;
         }
         
         /// <summary>

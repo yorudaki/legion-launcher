@@ -6,7 +6,7 @@ using Legion.Util;
 using Legion.Parsers;
 using Legion.Services;
 
-namespace Legion.Models 
+namespace Legion.Models
 {
     class Library {
         private SortedList<string, Game> _games;
@@ -27,9 +27,7 @@ namespace Legion.Models
         }
 
         private void AddSteamGames() {
-
-            var steamGames = new List<Game>();
-            steamGames = Fetcher.GetSteamGames();
+            var steamGames = Fetcher.GetSteamGames();
             
             foreach (Game game in steamGames) {
                 _games.Add(game.Name, game);
@@ -42,19 +40,26 @@ namespace Legion.Models
 
         #region public methods
 
-        public void AddGame(Game game) {
+        public bool AddGame(Game game) {
+            bool response = false;
             _games.Add(game.Name, game);
 
             var list = new List<Game>(_games.Values);
-            JsonParser.WriteLibrary(list);
-
+            if (JsonParser.WriteLibrary(list))
+                response = true;
+            
+            return response;
         }
 
-        public void RemoveGame(Game game) {
+        public bool RemoveGame(Game game) {
+            bool response = false;
             var list = new List<Game>(_games.Values);
 
             list.Remove(game);
-            JsonParser.WriteLibrary(list);
+            if (JsonParser.WriteLibrary(list))
+                response = true;
+            
+            return response;
         }
 
         public List<Game> GetGames() {
