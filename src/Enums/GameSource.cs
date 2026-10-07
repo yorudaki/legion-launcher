@@ -1,7 +1,10 @@
 using System;
 
-public enum GameSource {
-    Exe,
-    Steam,
-    AppImage
+namespace Legion.Enums
+{
+    public enum GameSource {
+        Exe,
+        Steam,
+        AppImage
+    }
 }

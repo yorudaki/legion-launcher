@@ -1,38 +1,33 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Microsoft.Win32;
 
 namespace Legion.Services
 {
     internal static class SteamServices
     {
-        internal static string GameStart(string appid)
+        internal static string StartGame(int appId)
         {
-            // abrir jogo normalmente se a steam estiver aberta, senão, abre steam silenciosamente antes
+            // start the game normally if steam is already started, else start steam silent
 
             string message = null;
-            string steamPath = Registry.GetValue("HKEY_CURRENT_USER\\Software\\Valve\\Steam", "SteamExe", null) as string;
-            ProcessStartInfo psi = new ProcessStartInfo();
-
-            if ( !(Process.GetProcessesByName("steam").Length > 0) )
-            {
-                psi.FileName = steamPath;
-                psi.UseShellExecute = true;
-                psi.Arguments = "-silent";
-                Process.Start(psi);
-            }
-
-            psi.FileName = $"steam://rungameid/{appid}";
-            psi.UseShellExecute = true;            
-
+            
             try
             {
-                Process.Start(psi);
+                if (Process.GetProcessesByName("steam").Length == 0) {
+                    ProcessStartInfo steamPsi = new ProcessStartInfo {
+                        FileName = "steam",
+                        Arguments = "-silent",
+                        UseShellExecute = true
+                    };
+                    Process.Start(steamPsi);
+                }
+
+                ProcessStartInfo gamePsi = new ProcessStartInfo {
+                    FileName = $"steam://rungameid/{appId}",
+                    UseShellExecute = true
+                };
+
+                Process.Start(gamePsi);
             }
             catch (Exception e)
             {

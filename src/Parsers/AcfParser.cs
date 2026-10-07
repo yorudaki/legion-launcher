@@ -1,12 +1,13 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Text.Json;
 
 using Legion.Models;
 using Legion.Util;
+using Legion.Enums;
 /* exemplo de arquivo acf
  
 "AppState"
@@ -61,12 +62,14 @@ using Legion.Util;
 */
 namespace Legion.Parsers
 {
-    internal static class AcfParser
-    {               
-        public static string ReadLine(string linha)
+    public static class AcfParser
+    {
+		/// <summary>
+		/// Given a line of content following the format: ("field" "content"), extracts the "content" bit and returns it.
+		/// </summary>
+        private static string ReadLine(string linha)
         {           
-            // levando em consideração que esse metodo só vai ler esses ACFs de um jogo steam,
-            // é tudo padronizado, de qualquer jeito, então n precisa preocupar com validação         
+            /// no verification needed, acf is standardized anyways
 
             int primeiro = linha.IndexOf('"');
             int segundo = linha.IndexOf('"', primeiro + 1);
@@ -74,6 +77,43 @@ namespace Legion.Parsers
             segundo = linha.IndexOf('"', primeiro + 1);            
 
             return linha.Substring(primeiro + 1, segundo - primeiro - 1);
-        }                                
+        }
+
+		/// <summary>
+		/// Given an .acf text file as string, returns an array of string containing the name, appid and installdir respectively.
+		/// </summary>
+		/// <returns>array[0] = name; array[1] = appid; array[2] = installdir; </returns>
+		private static string[] GetGameInfo(string file) {
+			string line, trimmedLine;
+			string[] returnArray = new string[3];
+
+			using (var sr = new StreamReader(file)) {
+				line = sr.ReadLine();
+				while (line != null) 
+				{
+					line = line.TrimStart();
+
+					if (line.StartsWith(""""name""""))
+						returnArray[0] = ReadLine(line);
+
+					else if (line.StartsWith(""""appid""""))
+						returnArray[1] = ReadLine(line);
+
+					else if (line.StartsWith(""""installdir""""))
+						returnArray[2] = ReadLine(line);
+				}
+			}
+
+			return returnArray;
+		}
+
+		/// <summary>
+		/// Given an .acf file text as string, returns a Game object based on the string.
+		/// </summary>
+		public static Game GetGameFromAcf(string file) {
+			string[] info = GetGameInfo(file);
+
+			return new Game(info[0], info[1], info[2], GameSource.Steam);
+		}
     }
 }
