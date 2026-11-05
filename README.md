@@ -2,16 +2,16 @@
 O projeto Legion Launcher tem o objetivo de agrupar todos os jogos instalados na máquina em uma só interface, oferecendo suporte às maiores lojas digitais de jogos como Steam, Epic Games, GOG, etc.
 
 ## Checklist
-- [x] Suporte overlay Steam
-- [x] Persistência de Dados (JSON)
+- [ ] Suporte overlay Steam
+- [ ] Persistência de Dados (JSON)
 - [ ] Gerenciamento de Biblioteca
-- [x] Execução de Jogos
+- [ ] Execução de Jogos
 - [ ] Interface de Usuário
-- [ ] Overlay original do Legion Launcher
+- [ ] Overlay original Legion
 
 ## Tecnologias utilizadas
 - C# (.NET)
-- ~~Winforms~~ Avalonia UI
+- ~~Winforms~~ Spectre.Console
 
 ## Aprendizado
 Esse projeto foi iniciado com o intuito de desenvolver habilidades em:
