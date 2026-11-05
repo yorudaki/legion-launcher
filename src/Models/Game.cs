@@ -7,16 +7,19 @@ namespace Legion.Models
         public string Name;
         public string InstallDir;
         public int Id;
-        private GameSource _source;
+        private EGameSource _source;
 
-        public Game(string name, string installDir, int id, GameSource source) {
+        public Game(string name, string installDir, int id, EGameSource source) {
+            if (name == " " || name == null)
+                throw new ArgumentNullException("name is empty!");
+
             Name = name;
             InstallDir = installDir;
             Id = id;
             _source = source;
         }
 
-        public GameSource Source { get{return _source;} }
+        public EGameSource Source { get{return _source;} }
 
     }
 }

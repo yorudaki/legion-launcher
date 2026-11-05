@@ -38,7 +38,7 @@ namespace Legion.Parsers
         /// <summary>
         /// Reads the data from the json containing the games seved in Library
         /// </summary>
-        /// <returns>Returns a list of all games saved in the json file</returns>
+        /// <returns>Returns a List of Game of all games saved in the json file</returns>
         public static List<Game> ReadLibrary()
         {
             List<Game> games = JsonSerializer.Deserialize<List<Game>>(LegionPath.LibraryJson);

@@ -2,13 +2,12 @@
 using System.IO;
 using System.Collections.Generic;
 using System.Text;
-using System.Threading.Tasks;
 using System.Text.Json;
 
 using Legion.Models;
 using Legion.Util;
 using Legion.Enums;
-/* exemplo de arquivo acf
+/* acf
  
 "AppState"
 {
@@ -67,55 +66,95 @@ namespace Legion.Parsers
 		/// <summary>
 		/// Given a line of content following the format: ("field" "content"), extracts the "content" bit and returns it.
 		/// </summary>
-        private static string ReadLine(string linha)
+        private static string ExtractContent(string line)
         {           
             /// no verification needed, acf is standardized anyways
+			string ret;
 
-            int first = linha.IndexOf('"');
-            int second = linha.IndexOf('"', first + 1);
-            first = linha.IndexOf('"', second + 1);
-            second = linha.IndexOf('"', first + 1);            
+            int first = line.IndexOf('"');
+            int second = line.IndexOf('"', first + 1);
 
-            return linha.Substring(first + 1, second - first - 1);
+            first = line.IndexOf('"', second + 1);
+            second = line.IndexOf('"', first + 1);            
+
+            ret = line.Substring(first + 1, second - first - 1);
+
+			return ret;
         }
 
 		/// <summary>
-		/// Given an .acf text file as string, modifies the out params, respectively: name, appId and installDir. If no value is found appropriate, the fallback is to: string = "", int = 0.
+		/// Checks if <paramref name="name"/> is contained in a set array of filter words:
+		/// <para>
+		/// "proton" "runtime" "steamworks"
+		/// </para>
 		/// </summary>
-		private static void GetGameInfo(string file, out string name, out int appId, out string installDir) {
+		/// <returns>Boolean value true if <paramref name="name"/> is contained in the array of filter words. False if not contained.</returns>
+		private static bool IsService(string name) {
+			bool response = false;
+			string[] filters = {
+				"proton", "runtime", "steamworks",
+			};
+
+			foreach (string word in filters){
+				if (name.ToLower().Contains(word))
+					response = true;
+			}
+
+			return response;
+		}
+
+		/// <summary>
+		/// Given an .acf text file as string, extracts its contents, being a name, an id and an "install dir"
+		/// </summary>
+		/// <returns>
+		/// String array of length 3 containing the relevant game information. The contents of the array are:
+		/// <para>info[0] = name;</para>
+		/// <para>info[1] = installDir;</para>
+		/// <para>info[2] = id;</para>
+		/// </returns>
+		private static string[] GetGameInfo(string file) {
 			string line;
-			name = "";
-			appId = 0;
-			installDir = "";
+			string[] info = new string[3];
 
 			using (var sr = new StreamReader(file)) {
-				line = sr.ReadLine();
-				while (line != null)
-				{
+				while ( (line = sr.ReadLine()) != null) {
+
 					line = line.TrimStart();
 
-					if (line.StartsWith(""""name""""))
-						name = ReadLine(line);
+					if (line.StartsWith($"\"name\"")) {
+						line = ExtractContent(line);
 
-					else if (line.StartsWith(""""appid""""))
-						appId = int.Parse(ReadLine(line));
+						if (IsService(line))
+							break;
 
-					else if (line.StartsWith(""""installdir""""))
-						installDir = ReadLine(line);
+						info[0] = ExtractContent(line);
+					}
+
+					else if (line.StartsWith($"\"installdir\"")) {
+						info[1] = ExtractContent(line);
+					}
+
+					else if (line.StartsWith($"\"appid\"")) {
+						info[2] = ExtractContent(line);
+					}
 				}
 			}
+
+			return info;
 		}
 
 		/// <summary>
 		/// Given an .acf file text as string, returns a Game object based on the string.
 		/// </summary>
+		/// <returns>Game object.
+		/// <para> Returns 'null' if the file fetched is a service program.</para>
+		/// </returns>
 		public static Game GetGameFromAcf(string file) {
-			string name, installDir;
-			int appId;
+			string[] info = GetGameInfo(file);
+			if (info[0] == null)
+				return null;
 
-			GetGameInfo(file, out name, out appId, out installDir);
-
-			return new Game(name, installDir, appId, GameSource.Steam);
+			return new Game(info[0], info[1], int.Parse(info[2]), EGameSource.Steam);
 		}
     }
 }

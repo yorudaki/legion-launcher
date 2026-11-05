@@ -1,24 +1,63 @@
-﻿using Avalonia;
-using System;
+﻿using System;
+using Spectre.Console;
 
-namespace LegionLauncher;
+using Legion.Models;
 
-sealed class Program
-{
-    // Initialization code. Don't use any Avalonia, third-party APIs or any
-    // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
-    // yet and stuff might break.
-    [STAThread]
-    public static void Main(string[] args) => BuildAvaloniaApp()
-        .StartWithClassicDesktopLifetime(args);
+class Program {
 
-    // Avalonia configuration, don't remove; also used by visual designer.
-    public static AppBuilder BuildAvaloniaApp()
-        => AppBuilder.Configure<App>()
-            .UsePlatformDetect()
-#if DEBUG
-            .WithDeveloperTools()
-#endif
-            .WithInterFont()
-            .LogToTrace();
+    #region buffer
+    
+    static void EnterAltBuffer() {
+        Console.Write("\x1b[?1049h");
+        Console.Clear();
+    }
+    static void LeaveBuffer() {
+        Console.WriteLine("Press any key to exit.");
+        Console.ReadKey();
+        Console.Write("\x1b[?1049l");
+    }
+
+    #endregion
+    
+    #region helper methods
+    
+    #endregion
+    
+    #region library control
+
+    static void AddNewGame(List<Game> list) {
+        string name, path;
+        int choice;
+
+        Console.Write($"\nInsert game name: ");
+        name = Console.ReadLine();
+
+        Console.Write($"\nInsert game path: ");
+        path = Console.ReadLine();
+
+        Console.Write($"\nIs game an executable or AppImage? (1-2): ");
+        choice = int.Parse(Console.ReadLine());
+    }
+    
+    #endregion
+
+    static void Main(string[] args) 
+    {
+        EnterAltBuffer();
+        /// --- INSERT APP LOGIC BELOW ---
+        
+        Library library = new Library();
+        library.AddSteamGames();
+        List<Game> gamesList = library.GetGames();
+        
+        if (gamesList.Count == 0)
+            Console.WriteLine("No games found.");
+        else
+            foreach (Game game in gamesList) {
+                Console.WriteLine(game.Name);
+            }
+
+        /// --- INSERT APP LOGIC ABOVE ---
+        LeaveBuffer();
+    }
 }

@@ -5,17 +5,51 @@ using System.Collections.Generic;
 using Legion.Util;
 using Legion.Parsers;
 using Legion.Services;
+using Legion.Enums;
 
 namespace Legion.Models
 {
     class Library {
-        private SortedList<string, Game> _games;
+        private SortedList<int, Game> _games;
+        private List<Dir> _directories;
 
-        public Library() {
-            _games = new SortedList<string, Game>();
+        #region constructors
+        private void Init() {
+            _games = new SortedList<int, Game>();
+            _directories = new List<Dir>();
+            _directories.Add(new Dir(LegionPath.Steamapps, true));
         }
+        public Library() {
+            Init();
+        }
+        public Library(string directory) {
+            Init();
+            _directories.Add(new Dir(directory));
+        }
+        public Library(string directory, bool isSteamDirectory){
+            Init();
+            _directories.Add(new Dir(directory, isSteamDirectory));
+        }
+        #endregion
 
         #region helper methods
+
+        private bool IsEven(int number) {
+            return number % 2 == 0;
+        }
+
+        private int GenerateId() { // custom game base id: 108101103
+            Random rnd = new Random();
+            int num = rnd.Next(1, 101);
+            int id = 108101103; // 108-l 101-e 103-g
+
+            if (IsEven(num))
+                id += num;
+            else
+                id -= num;
+            
+            return id;
+        }
 
         #endregion
 
@@ -23,31 +57,40 @@ namespace Legion.Models
         private void LoadLibrary() {
             var list = JsonParser.ReadLibrary();
             foreach (Game game in list)
-                _games.Add(game.Name, game);
+                _games.Add(game.Id, game);
         }
-
-        private void AddSteamGames() {
-            var steamGames = Fetcher.GetSteamGames();
-            
-            foreach (Game game in steamGames) {
-                _games.Add(game.Name, game);
-            }
-
-            LoadLibrary();
-        }
-
         #endregion
 
         #region public methods
 
-        public bool AddGame(Game game) {
-            bool response = false;
-            _games.Add(game.Name, game);
-
-            var list = new List<Game>(_games.Values);
-            if (JsonParser.WriteLibrary(list))
-                response = true;
+        /// <summary>
+        /// Tries to fetch steam games within the steam directories and save the games in the library list.
+        /// </summary>
+        /// <returns>
+        /// Returns <c>true</c> if any game is successfully saved in the library, else returns <c>false</c> if no games are saved due to failure in fetching.
+        /// </returns>
+        public bool AddSteamGames() {
+            bool response = true;
+            List<Game> steamGames = Fetcher.GetSteamGames();
             
+            foreach (Game game in steamGames)
+                _games.Add(game.Id, game);
+            
+            if (_games.Count == 0)
+                response = false;
+            
+            return response;
+        }
+
+        public bool AddGame(string name, string installDir, EGameSource source) {
+            bool response;
+            Game game = new Game(name, installDir, GenerateId(), source);
+            var list = new List<Game>(_games.Values);
+
+            _games.Add(game.Id, game);
+
+            response = JsonParser.WriteLibrary(list);
+
             return response;
         }
 
@@ -70,6 +113,13 @@ namespace Legion.Models
             return returnList;
         }
         
+        public void AddDirectory(string directory, bool isSteamDirectory = false) {
+            _directories.Add( new Dir(directory, isSteamDirectory) );
+        }
+
+        public void RemoveDirectory(int index) {
+            _directories.RemoveAt(index);
+        }
         #endregion
     }
 }
